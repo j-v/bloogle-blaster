@@ -3,6 +3,7 @@ import './App.css';
 import saw from './wavetables/saw';
 import phonemeO from './wavetables/Phoneme_o';
 import * as Bootstrap from 'react-bootstrap'
+import { AudioContext } from 'standardized-audio-context';
 
 interface AppProps {
 
@@ -54,6 +55,19 @@ const App = (props: AppProps) => {
     o.stop(audioContext.currentTime + 0.5);
   }
 
+  const wah = (freq: number) => {
+    const o = audioContext.createOscillator();
+    o.type = "square";
+    o.frequency.value = freq;
+    const filter = audioContext.createBiquadFilter();
+    filter.frequency.cancelScheduledValues(audioContext.currentTime);
+    filter.frequency.setValueAtTime(100, audioContext.currentTime);
+    filter.frequency.linearRampToValueAtTime(2000, audioContext.currentTime + 0.5);
+    o.connect(filter).connect(audioContext.destination);
+    o.start();
+    o.stop(audioContext.currentTime + 0.5);
+  }
+
   const midiHandler = (msg: WebMidi.MIDIMessageEvent) => {
     console.log(msg);
     const noteToFreq = (note: number) => {
@@ -85,13 +99,18 @@ const App = (props: AppProps) => {
     return () => sound(f);
   }
 
+  const sounds = [
+    //{ name: 'buzz', sound: buzz},
+    { name: 'bizz', sound: bizz},
+    { name: 'merrp', sound: sayOh},
+    { name: 'wah', sound: wah},
+  ]
+
   return (
     <div>
       <h1>hey synth heads</h1>
       <Bootstrap.ButtonToolbar>
-        <Bootstrap.Button variant='primary' size='lg' onClick={makesound(buzz)}>buzz</Bootstrap.Button>
-        <Bootstrap.Button variant='light' size='lg' onClick={makesound(bizz)}>bizz</Bootstrap.Button>
-        <Bootstrap.Button variant='light' size='lg' onClick={makesound(sayOh)}>merrp</Bootstrap.Button>
+        { sounds.map((soundData) => { return <Bootstrap.Button style={{margin: 10}} size='lg' onClick={makesound(soundData.sound)}>{soundData.name}</Bootstrap.Button>; }) }
       </Bootstrap.ButtonToolbar>
     </div>
   );
