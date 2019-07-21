@@ -9,6 +9,12 @@ interface AppProps {
 
 }
 
+type SynthSound = {
+  name: string,
+  sound: (f: number) => void,
+  buttonStyle?: React.CSSProperties
+}
+
 const initMidi = async (midiHandler: (msg: WebMidi.MIDIMessageEvent) => void) => {
   const midi = await navigator.requestMIDIAccess();
   midi.inputs.forEach((input: WebMidi.MIDIInput, key: string) => {
@@ -58,7 +64,7 @@ const App = (props: AppProps) => {
   const wah = (freq: number) => {
     const o = audioContext.createOscillator();
     o.type = "square";
-    o.frequency.value = freq;
+    o.frequency.value = freq / 2;
     const filter = audioContext.createBiquadFilter();
     filter.frequency.cancelScheduledValues(audioContext.currentTime);
     filter.frequency.setValueAtTime(100, audioContext.currentTime);
@@ -66,6 +72,28 @@ const App = (props: AppProps) => {
     o.connect(filter).connect(audioContext.destination);
     o.start();
     o.stop(audioContext.currentTime + 0.5);
+  }
+
+  const laser = (freq: number) => {
+    const o = audioContext.createOscillator();
+    o.type = "square";
+    o.frequency.value = freq / 2;
+    o.frequency.cancelScheduledValues(audioContext.currentTime);
+    o.frequency.setValueAtTime(freq * 4, audioContext.currentTime);
+    o.frequency.linearRampToValueAtTime(20, audioContext.currentTime + 0.35);
+
+    const d = audioContext.createDelay();
+    d.delayTime.value = 0.12;
+    
+    const feedback = audioContext.createGain();
+    feedback.gain.value = 0.4;
+
+    d.connect(feedback);
+    feedback.connect(d);
+   
+    o.connect(d).connect(audioContext.destination);
+    o.start();
+    o.stop(audioContext.currentTime + 0.35);
   }
 
   const midiHandler = (msg: WebMidi.MIDIMessageEvent) => {
@@ -99,18 +127,19 @@ const App = (props: AppProps) => {
     return () => sound(f);
   }
 
-  const sounds = [
+  const sounds: SynthSound[] = [
     //{ name: 'buzz', sound: buzz},
-    { name: 'bizz', sound: bizz},
-    { name: 'merrp', sound: sayOh},
-    { name: 'wah', sound: wah},
+    { name: 'bizz', sound: bizz },
+    { name: 'merrp', sound: sayOh, buttonStyle: { fontStyle: 'italic', borderColor: 'orange', borderWidth: 5} },
+    { name: 'wah', sound: wah, buttonStyle: { background: 'orange' } },
+    { name: 'ZAPP', sound: laser, buttonStyle: { background: 'black', color: '#00FF00' }}
   ]
 
   return (
     <div>
       <h1>hey synth heads</h1>
       <Bootstrap.ButtonToolbar>
-        { sounds.map((soundData) => { return <Bootstrap.Button style={{margin: 10}} size='lg' onMouseDown={makesound(soundData.sound)}>{soundData.name}</Bootstrap.Button>; }) }
+        {sounds.map((soundData) => { return <Bootstrap.Button style={{ margin: 10, ...soundData.buttonStyle }} size='lg' onMouseDown={makesound(soundData.sound)}>{soundData.name}</Bootstrap.Button>; })}
       </Bootstrap.ButtonToolbar>
     </div>
   );
