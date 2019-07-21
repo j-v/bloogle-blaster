@@ -136,6 +136,35 @@ const sounds: SynthSound[] = [
   { name: 'ZAPP', sound: laser, buttonStyle: { background: 'black', color: '#00FF00' }}
 ]
 
+let tempo = 120;
+let currentNote = 0; // The note we are currently playing
+let nextNoteTime = 0.0; // when the next note is due.
+function nextNote() {
+  const secondsPerBeat = 60.0 / tempo;
+
+  nextNoteTime += secondsPerBeat; // Add beat length to last beat time
+
+  // Advance the beat number, wrap to zero
+  currentNote++;
+  if (currentNote === 4) {
+    currentNote = 0;
+  }
+
+}
+
+let timerID: number;
+const lookahead = 25.0; // How frequently to call scheduling function (in milliseconds)
+const scheduleAheadTime = 0.1; // How far ahead to schedule audio (sec)
+function sequenceScheduler() {
+  // while there are notes that will need to play before the next interval,
+  // schedule them and advance the pointer.
+  while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
+      //scheduleNote(currentNote, nextNoteTime); // TODO
+      nextNote();
+  }
+  timerID = window.setTimeout(sequenceScheduler, lookahead);
+}
+
 const App = (props: AppProps) => {
   const [playing, setPlaying] = React.useState(false);
 
