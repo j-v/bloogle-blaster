@@ -110,7 +110,7 @@ const App = (props: AppProps) => {
     <div>
       <h1>hey synth heads</h1>
       <Bootstrap.ButtonToolbar>
-        { sounds.map((soundData) => { return <Bootstrap.Button style={{margin: 10}} size='lg' onClick={makesound(soundData.sound)}>{soundData.name}</Bootstrap.Button>; }) }
+        { sounds.map((soundData) => { return <Bootstrap.Button style={{margin: 10}} size='lg' onMouseDown={makesound(soundData.sound)}>{soundData.name}</Bootstrap.Button>; }) }
       </Bootstrap.ButtonToolbar>
     </div>
   );
