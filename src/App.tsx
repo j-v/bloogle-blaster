@@ -3,8 +3,7 @@ import './App.css';
 import saw from './wavetables/saw';
 import phonemeO from './wavetables/Phoneme_o';
 import * as Bootstrap from 'react-bootstrap'
-import { AudioContext } from 'standardized-audio-context';
-import { start } from 'repl';
+import { AudioContext, IOscillatorNode, IAudioContext } from 'standardized-audio-context';
 
 interface AppProps {
 
@@ -12,7 +11,7 @@ interface AppProps {
 
 type SynthSound = {
   name: string,
-  sound: (f: number) => void,
+  sound: (f: number) => IOscillatorNode<IAudioContext>,
   buttonStyle?: React.CSSProperties
 }
 
@@ -33,33 +32,30 @@ const phonemeOWave = audioContext.createPeriodicWave(phonemeO.real, phonemeO.ima
 //const makeOsc = () => audioContext.createOscillator().connect(audioContext.destination) as OscillatorNode;
 
 const makeOsc = () => {
-  const c = audioContext.createOscillator();
-  c.connect(audioContext.destination);
-  return c;
+  const osc = audioContext.createOscillator();
+  osc.connect(audioContext.destination);
+  return osc;
 }
 
-const buzz = (freq: number) => {
+const buzz = (freq: number): IOscillatorNode<IAudioContext> => {
   const osc = makeOsc();
   osc.setPeriodicWave(sawWave);
   osc.frequency.value = freq;
-  osc.start();
-  osc.stop(audioContext.currentTime + 0.5);
+  return osc;
 }
 
 const bizz = (freq: number) => {
   const o = makeOsc();
   o.type = "sawtooth";
   o.frequency.value = freq;
-  o.start();
-  o.stop(audioContext.currentTime + 0.5);
+  return o;
 }
 
 const sayOh = (freq: number) => {
   const o = makeOsc()
   o.setPeriodicWave(phonemeOWave);
   o.frequency.value = freq;
-  o.start();
-  o.stop(audioContext.currentTime + 0.5);
+  return o;
 }
 
 const wah = (freq: number) => {
@@ -71,8 +67,7 @@ const wah = (freq: number) => {
   filter.frequency.setValueAtTime(100, audioContext.currentTime);
   filter.frequency.linearRampToValueAtTime(2000, audioContext.currentTime + 0.5);
   o.connect(filter).connect(audioContext.destination);
-  o.start();
-  o.stop(audioContext.currentTime + 0.5);
+  return o;
 }
 
 const laser = (freq: number) => {
@@ -93,8 +88,7 @@ const laser = (freq: number) => {
   feedback.connect(d);
  
   o.connect(d).connect(audioContext.destination);
-  o.start();
-  o.stop(audioContext.currentTime + 0.35);
+  return o;
 }
 
 const midiHandler = (msg: WebMidi.MIDIMessageEvent) => {
@@ -124,8 +118,17 @@ const midiHandler = (msg: WebMidi.MIDIMessageEvent) => {
 initMidi(midiHandler);
 
 const f = 220;
-function makesound(sound: (f: number) => void): () => void {
-  return () => sound(f);
+function makesound(sound: (f: number) => IOscillatorNode<IAudioContext>, t?: number): () => void {
+  return () => {
+    const duration = 0.5;
+    if (!t) {
+      t = audioContext.currentTime;
+    }
+    t = audioContext.currentTime; // test
+    const osc = sound(f);
+    osc.start(t);
+    osc.stop(t + duration);
+  }
 }
 
 const sounds: SynthSound[] = [
@@ -134,10 +137,11 @@ const sounds: SynthSound[] = [
   { name: 'merrp', sound: sayOh, buttonStyle: { fontStyle: 'italic', borderColor: 'orange', borderWidth: 5} },
   { name: 'wah', sound: wah, buttonStyle: { background: 'orange' } },
   { name: 'ZAPP', sound: laser, buttonStyle: { background: 'black', color: '#00FF00' }}
-]
+];
 
 let tempo = 120;
 let currentNote = 0; // The note we are currently playing
+const maxNote = 4;
 let nextNoteTime = 0.0; // when the next note is due.
 function nextNote() {
   const secondsPerBeat = 60.0 / tempo;
@@ -146,10 +150,15 @@ function nextNote() {
 
   // Advance the beat number, wrap to zero
   currentNote++;
-  if (currentNote === 4) {
+  if (currentNote === maxNote) {
     currentNote = 0;
   }
+}
 
+const scheduleNote = (noteIndex: number, noteTime: number): void => {
+  const sound = sounds[Math.floor(Math.random() * sounds.length)];
+  makesound(sound.sound, noteTime);
+  //console.log(noteIndex);
 }
 
 let timerID: number;
@@ -159,7 +168,7 @@ function sequenceScheduler() {
   // while there are notes that will need to play before the next interval,
   // schedule them and advance the pointer.
   while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
-      //scheduleNote(currentNote, nextNoteTime); // TODO
+      scheduleNote(currentNote, nextNoteTime); // TODO
       nextNote();
   }
   timerID = window.setTimeout(sequenceScheduler, lookahead);
@@ -170,17 +179,20 @@ const App = (props: AppProps) => {
 
   const startSequence = () => {
     setPlaying(true);
+    sequenceScheduler();
   }
 
   const stopSequence = () => {
     setPlaying(false);
+    clearTimeout(timerID);
   }
 
   return (
     <div>
       <h1>hey synth heads</h1>
       <Bootstrap.ButtonToolbar>
-        {sounds.map((soundData) => { return <Bootstrap.Button style={{ margin: 10, ...soundData.buttonStyle }} size='lg' onMouseDown={makesound(soundData.sound)}>{soundData.name}</Bootstrap.Button>; })}
+        {sounds.map((soundData) => { return <Bootstrap.Button style={{ margin: 10, ...soundData.buttonStyle }} size='lg' 
+        onMouseDown={makesound(soundData.sound)}>{soundData.name}</Bootstrap.Button>; })}
       </Bootstrap.ButtonToolbar>
       <Bootstrap.ButtonToolbar>
         { !playing && <Bootstrap.Button size='lg' onClick={startSequence}>Start</Bootstrap.Button>}
