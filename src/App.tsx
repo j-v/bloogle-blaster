@@ -84,10 +84,16 @@ const laser = (freq: number) => {
   const feedback = audioContext.createGain();
   feedback.gain.value = 0.4;
 
+  const m = audioContext.createChannelMerger(2);
+  o.connect(m, 0, 0);
+  d.connect(m, 0, 1);
+
   d.connect(feedback);
   feedback.connect(d);
  
-  o.connect(d).connect(audioContext.destination);
+  //o.connect(d).connect(audioContext.destination);
+  o.connect(d);
+  m.connect(audioContext.destination);
   return o;
 }
 
@@ -120,7 +126,7 @@ initMidi(midiHandler);
 const f = 220;
 function makesound(sound: (f: number) => IOscillatorNode<IAudioContext>, t?: number): () => void {
   return () => {
-    const duration = 0.5;
+    const duration = 0.3;
     if (!t) {
       t = audioContext.currentTime;
     }
@@ -139,7 +145,7 @@ const sounds: SynthSound[] = [
   { name: 'ZAPP', sound: laser, buttonStyle: { background: 'black', color: '#00FF00' }}
 ];
 
-let tempo = 120;
+let tempo = 240;
 let currentNote = 0; // The note we are currently playing
 const maxNote = 4;
 let nextNoteTime = 0.0; // when the next note is due.
@@ -157,7 +163,7 @@ function nextNote() {
 
 const scheduleNote = (noteIndex: number, noteTime: number): void => {
   const sound = sounds[Math.floor(Math.random() * sounds.length)];
-  makesound(sound.sound, noteTime);
+  makesound(sound.sound, noteTime)();
   //console.log(noteIndex);
 }
 
