@@ -1,18 +1,12 @@
 import React from 'react';
+import * as Bootstrap from 'react-bootstrap';
+import { AudioContext, IAudioContext, IOscillatorNode } from 'standardized-audio-context';
 import './App.css';
-import * as Bootstrap from 'react-bootstrap'
-import { AudioContext, IOscillatorNode, IAudioContext } from 'standardized-audio-context';
 import { sounds } from './Sounds';
 
 interface AppProps {
 
 }
-
-// type SynthSound = {
-//   name: string,
-//   sound: (f: number) => IOscillatorNode<IAudioContext>,
-//   buttonStyle?: React.CSSProperties
-// }
 
 const initMidi = async (midiHandler: (msg: WebMidi.MIDIMessageEvent) => void) => {
   const midi = await navigator.requestMIDIAccess();
@@ -22,79 +16,7 @@ const initMidi = async (midiHandler: (msg: WebMidi.MIDIMessageEvent) => void) =>
   })
 }
 
-
 const audioContext = new AudioContext({ latencyHint: 'interactive' });
-// const sawWave = audioContext.createPeriodicWave(saw.real, saw.imag);
-// const phonemeOWave = audioContext.createPeriodicWave(phonemeO.real, phonemeO.imag);
-
-// TODO why doesn't this work?
-//const makeOsc = () => audioContext.createOscillator().connect(audioContext.destination) as OscillatorNode;
-
-// const makeOsc = () => {
-//   const osc = audioContext.createOscillator();
-//   osc.connect(audioContext.destination);
-//   return osc;
-// }
-
-// const buzz = (freq: number): IOscillatorNode<IAudioContext> => {
-//   const osc = makeOsc();
-//   osc.setPeriodicWave(sawWave);
-//   osc.frequency.value = freq;
-//   return osc;
-// }
-
-// const bizz = (freq: number) => {
-//   const o = makeOsc();
-//   o.type = "sawtooth";
-//   o.frequency.value = freq;
-//   return o;
-// }
-
-// const sayOh = (freq: number) => {
-//   const o = makeOsc()
-//   o.setPeriodicWave(phonemeOWave);
-//   o.frequency.value = freq;
-//   return o;
-// }
-
-// const wah = (freq: number) => {
-//   const o = audioContext.createOscillator();
-//   o.type = "square";
-//   o.frequency.value = freq / 2;
-//   const filter = audioContext.createBiquadFilter();
-//   filter.frequency.cancelScheduledValues(audioContext.currentTime);
-//   filter.frequency.setValueAtTime(100, audioContext.currentTime);
-//   filter.frequency.linearRampToValueAtTime(2000, audioContext.currentTime + 0.5);
-//   o.connect(filter).connect(audioContext.destination);
-//   return o;
-// }
-
-// const laser = (freq: number) => {
-//   const o = audioContext.createOscillator();
-//   o.type = "square";
-//   o.frequency.value = freq / 2;
-//   o.frequency.cancelScheduledValues(audioContext.currentTime);
-//   o.frequency.setValueAtTime(freq * 4, audioContext.currentTime);
-//   o.frequency.linearRampToValueAtTime(20, audioContext.currentTime + 0.35);
-
-//   const d = audioContext.createDelay();
-//   d.delayTime.value = 0.12;
-  
-//   const feedback = audioContext.createGain();
-//   feedback.gain.value = 0.4;
-
-//   const m = audioContext.createChannelMerger(2);
-//   o.connect(m, 0, 0);
-//   d.connect(m, 0, 1);
-
-//   d.connect(feedback);
-//   feedback.connect(d);
- 
-//   //o.connect(d).connect(audioContext.destination);
-//   o.connect(d);
-//   m.connect(audioContext.destination);
-//   return o;
-// }
 
 const midiHandler = (msg: WebMidi.MIDIMessageEvent) => {
   console.log(msg);
@@ -130,20 +52,11 @@ function makesound(sound: (audioContext: IAudioContext, f: number) => IOscillato
     if (!t) {
       t = audioContext.currentTime;
     }
-    // t = audioContext.currentTime; // test
     const osc = sound(audioContext, f);
     osc.start(t);
     osc.stop(t + duration);
   }
 }
-
-// const sounds: SynthSound[] = [
-//   //{ name: 'buzz', sound: buzz},
-//   { name: 'bizz', sound: bizz },
-//   { name: 'merrp', sound: sayOh, buttonStyle: { fontStyle: 'italic', borderColor: 'orange', borderWidth: 5} },
-//   { name: 'wah', sound: wah, buttonStyle: { background: 'orange' } },
-//   { name: 'ZAPP', sound: laser, buttonStyle: { background: 'black', color: '#00FF00' }}
-// ];
 
 let tempo = 120;
 let currentNote = 0; // The note we are currently playing
@@ -164,7 +77,6 @@ function nextNote() {
 const scheduleNote = (noteIndex: number, noteTime: number): void => {
   const sound = sounds[Math.floor(Math.random() * sounds.length)];
   makesound(sound.sound, noteTime)();
-  //console.log(noteIndex);
 }
 
 let timerID: number;
