@@ -87,7 +87,7 @@ function sequenceScheduler() {
   // while there are notes that will need to play before the next interval,
   // schedule them and advance the pointer.
   while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
-      scheduleNote(currentNote, nextNoteTime); // TODO
+      scheduleNote(currentNote, nextNoteTime);
       nextNote();
   }
   timerID = window.setTimeout(sequenceScheduler, lookahead);

@@ -70,16 +70,12 @@ const laserSound = (audioContext: IAudioContext, freq: number) => {
     d.connect(feedback);
     feedback.connect(d);
 
-    //o.connect(d).connect(audioContext.destination);
     o.connect(d);
     m.connect(audioContext.destination);
     return o;
 }
 
-//export const sounds: SynthSound[] = [
-    //{ name: 'buzz', sound: buzz},
-    export const bizz: SynthSound = { name: 'bizz', sound: bizzSound };
-    export const sayOh: SynthSound = { name: 'merrp', sound: sayOhSound, buttonStyle: { fontStyle: 'italic', borderColor: 'orange', borderWidth: 5 } };
-    export const wah: SynthSound = { name: 'wah', sound: wahSound, buttonStyle: { background: 'orange' } };
-    export const laser: SynthSound = { name: 'ZAPP', sound: laserSound, buttonStyle: { background: 'black', color: '#00FF00' } };
-//];
+export const bizz: SynthSound = { name: 'bizz', sound: bizzSound };
+export const sayOh: SynthSound = { name: 'merrp', sound: sayOhSound, buttonStyle: { fontStyle: 'italic', borderColor: 'orange', borderWidth: 5 } };
+export const wah: SynthSound = { name: 'wah', sound: wahSound, buttonStyle: { background: 'orange' } };
+export const laser: SynthSound = { name: 'ZAPP', sound: laserSound, buttonStyle: { background: 'black', color: '#00FF00' } };
