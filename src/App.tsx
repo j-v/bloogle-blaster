@@ -2,7 +2,9 @@ import React from 'react';
 import * as Bootstrap from 'react-bootstrap';
 import { AudioContext, IAudioContext, IOscillatorNode } from 'standardized-audio-context';
 import './App.css';
-import { sounds } from './Sounds';
+import * as Sounds from './Sounds';
+
+const sounds = [ Sounds.bizz, Sounds.laser, Sounds.sayOh, Sounds.wah];
 
 interface AppProps {
 
@@ -28,11 +30,10 @@ const midiHandler = (msg: WebMidi.MIDIMessageEvent) => {
   var note = msg.data[1];
   var velocity = (msg.data.length > 2) ? msg.data[2] : 0; // a velocity value might not be included with a noteOff command
 
-  const sayOh = sounds[1].sound; // TODO export sound directly probably is nicer
   switch (command) {
     case 152: // noteOn
       if (velocity > 0) {
-        sayOh(audioContext, noteToFreq(note) * 4);
+        Sounds.sayOh.sound(audioContext, noteToFreq(note) * 4);
       } else {
         // do noteOff
       }

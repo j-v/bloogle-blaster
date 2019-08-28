@@ -14,7 +14,7 @@ const makeOsc = (audioContext: IAudioContext) => {
     return osc;
 }
 
-const buzz = (audioContext: IAudioContext, freq: number): IOscillatorNode<IAudioContext> => {
+const buzzSound = (audioContext: IAudioContext, freq: number): IOscillatorNode<IAudioContext> => {
     const sawWave = audioContext.createPeriodicWave(saw.real, saw.imag); // TODO only init once
     const osc = makeOsc(audioContext);
     osc.setPeriodicWave(sawWave);
@@ -22,14 +22,14 @@ const buzz = (audioContext: IAudioContext, freq: number): IOscillatorNode<IAudio
     return osc;
 }
 
-const bizz = (audioContext: IAudioContext, freq: number) => {
+const bizzSound = (audioContext: IAudioContext, freq: number) => {
     const o = makeOsc(audioContext);
     o.type = "sawtooth";
     o.frequency.value = freq;
     return o;
 }
 
-const sayOh = (audioContext: IAudioContext, freq: number) => {
+const sayOhSound = (audioContext: IAudioContext, freq: number) => {
     const phonemeOWave = audioContext.createPeriodicWave(phonemeO.real, phonemeO.imag); // TODO only init once
     const o = makeOsc(audioContext)
     o.setPeriodicWave(phonemeOWave);
@@ -37,7 +37,7 @@ const sayOh = (audioContext: IAudioContext, freq: number) => {
     return o;
 }
 
-const wah = (audioContext: IAudioContext, freq: number) => {
+const wahSound = (audioContext: IAudioContext, freq: number) => {
     const o = audioContext.createOscillator();
     o.type = "square";
     o.frequency.value = freq / 2;
@@ -49,7 +49,7 @@ const wah = (audioContext: IAudioContext, freq: number) => {
     return o;
 }
 
-const laser = (audioContext: IAudioContext, freq: number) => {
+const laserSound = (audioContext: IAudioContext, freq: number) => {
     const o = audioContext.createOscillator();
     o.type = "square";
     o.frequency.value = freq / 2;
@@ -76,10 +76,10 @@ const laser = (audioContext: IAudioContext, freq: number) => {
     return o;
 }
 
-export const sounds: SynthSound[] = [
+//export const sounds: SynthSound[] = [
     //{ name: 'buzz', sound: buzz},
-    { name: 'bizz', sound: bizz },
-    { name: 'merrp', sound: sayOh, buttonStyle: { fontStyle: 'italic', borderColor: 'orange', borderWidth: 5 } },
-    { name: 'wah', sound: wah, buttonStyle: { background: 'orange' } },
-    { name: 'ZAPP', sound: laser, buttonStyle: { background: 'black', color: '#00FF00' } }
-];
+    export const bizz: SynthSound = { name: 'bizz', sound: bizzSound };
+    export const sayOh: SynthSound = { name: 'merrp', sound: sayOhSound, buttonStyle: { fontStyle: 'italic', borderColor: 'orange', borderWidth: 5 } };
+    export const wah: SynthSound = { name: 'wah', sound: wahSound, buttonStyle: { background: 'orange' } };
+    export const laser: SynthSound = { name: 'ZAPP', sound: laserSound, buttonStyle: { background: 'black', color: '#00FF00' } };
+//];
