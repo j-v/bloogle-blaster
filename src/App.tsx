@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEvent, FormEvent } from 'react';
 import * as Bootstrap from 'react-bootstrap';
 import { AudioContext, IAudioContext, IOscillatorNode } from 'standardized-audio-context';
 import './App.css';
@@ -107,6 +107,11 @@ const App = (props: AppProps) => {
     clearTimeout(timerID);
   }
 
+  const onVolumeChange = (e: FormEvent<HTMLInputElement>) => {
+    const newVolume = e.currentTarget.value;
+    // TODO set volume
+  }
+
   return (
     <div>
       <h1>hey synth heads</h1>
@@ -118,6 +123,7 @@ const App = (props: AppProps) => {
         { !playing && <Bootstrap.Button size='lg' onClick={startSequence}>Start</Bootstrap.Button>}
         { playing && <Bootstrap.Button size='lg' onClick={stopSequence}>Stop</Bootstrap.Button>}
       </Bootstrap.ButtonToolbar>
+      <input type="range" onChange={onVolumeChange}/>
     </div>
   );
 }
